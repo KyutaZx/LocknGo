@@ -241,11 +241,26 @@ export default function BookingPage() {
                 <div className="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-900 space-y-2">
                   <div className="flex items-center gap-2 font-bold text-sm">
                     <AlertTriangle className="w-4 h-4 text-red-600" />
-                    <span>Waktu Sewa Telah Habis!</span>
+                    <span>
+                      {lateInfo.overCap
+                        ? 'Melewati Batas 24 Jam — Barang Diamankan Petugas'
+                        : 'Waktu Sewa Telah Habis'}
+                    </span>
                   </div>
                   <p className="text-xs leading-relaxed">
-                    Keterlambatan {lateInfo.minutes} menit ({lateInfo.blocks} blok 5 menit). Denda saat ini:{' '}
-                    <strong className="font-mono text-sm">{rupiah(lateInfo.amount)}</strong>.
+                    {lateInfo.overCap ? (
+                      <>
+                        Keterlambatan sudah lebih dari 24 jam. Denda berhenti di batas maksimal{' '}
+                        <strong className="font-mono text-sm">{rupiah(lateInfo.amount)}</strong>{' '}
+                        dan barang diamankan oleh petugas LocknGo (disimpan hingga 7 hari).
+                      </>
+                    ) : (
+                      <>
+                        Keterlambatan {lateInfo.minutes} menit ({lateInfo.blocks} blok 5 menit). Denda saat ini:{' '}
+                        <strong className="font-mono text-sm">{rupiah(lateInfo.amount)}</strong>{' '}
+                        (maksimal {rupiah(CFG.late.maxPerDay)} / 24 jam).
+                      </>
+                    )}
                   </p>
                 </div>
               )}

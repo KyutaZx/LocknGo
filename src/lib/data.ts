@@ -40,7 +40,7 @@ export const CFG = {
   late: {
     perBlock: 5000,
     blockMinutes: 5,
-    maxPerDay: 120000,
+    maxPerDay: 1440000,
     capHours: 24,
     lockSeconds: 300,
     storeDays: 7,

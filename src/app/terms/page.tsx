@@ -17,7 +17,7 @@ const TERMS_SECTIONS = [
   {
     num: '02',
     title: 'Keterlambatan & Denda',
-    body: 'Tidak terdapat masa toleransi keterlambatan. Keterlambatan dihitung sejak kode QR dipindai di unit loker sebesar Rp5.000 per blok 5 menit, dengan batas denda maksimal 24 jam (Rp120.000). Tarif denda dikunci selama 5 menit sejak tagihan muncul.',
+    body: 'Tidak terdapat masa toleransi keterlambatan. Keterlambatan dihitung Rp5.000 per blok 5 menit (1–5 menit Rp5.000, 6–10 menit Rp10.000, dst.) dengan batas maksimal 24 jam sebesar Rp1.440.000. Jika melewati 24 jam, barang diamankan oleh petugas LocknGo.',
   },
   {
     num: '03',

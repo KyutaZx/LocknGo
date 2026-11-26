@@ -14,6 +14,7 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 import { rupiah, pad } from '@/lib/engine';
+import { CFG } from '@/lib/data';
 import { LocationConfig } from '@/types/locker';
 
 const PICKUP_QR_SECONDS = 600; // 10 menit
@@ -180,14 +181,30 @@ export default function PickupStep({
           <div className="p-5 rounded-2xl bg-amber-50 border border-amber-300 text-left space-y-3">
             <div className="flex items-center gap-2 text-amber-900 font-bold text-sm">
               <AlertTriangle className="w-5 h-5 text-amber-700 flex-shrink-0" />
-              <span>Kelebihan Waktu Sewa</span>
+              <span>
+                {lateAmount >= CFG.late.maxPerDay
+                  ? 'Batas Maksimal 24 Jam — Barang Diamankan'
+                  : 'Kelebihan Waktu Sewa'}
+              </span>
             </div>
             <p className="text-xs text-amber-800 leading-relaxed">
-              Waktu sewa telah berakhir. Tagihan denda sebesar{' '}
-              <strong className="font-mono text-sm text-bloodwine">
-                {rupiah(lateAmount)}
-              </strong>{' '}
-              harus diselesaikan sebelum pintu loker dapat dibuka.
+              {lateAmount >= CFG.late.maxPerDay ? (
+                <>
+                  Keterlambatan melewati 24 jam sehingga barang diamankan petugas LocknGo. Selesaikan denda maksimal{' '}
+                  <strong className="font-mono text-sm text-bloodwine">
+                    {rupiah(lateAmount)}
+                  </strong>{' '}
+                  via QRIS untuk mengambil kembali barangmu.
+                </>
+              ) : (
+                <>
+                  Waktu sewa telah berakhir. Tagihan denda sebesar{' '}
+                  <strong className="font-mono text-sm text-bloodwine">
+                    {rupiah(lateAmount)}
+                  </strong>{' '}
+                  (Rp5.000 per 5 menit, maks {rupiah(CFG.late.maxPerDay)} / 24 jam) harus diselesaikan sebelum pintu loker terbuka.
+                </>
+              )}
             </p>
             <button
               type="button"

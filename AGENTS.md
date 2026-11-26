@@ -32,4 +32,4 @@ Satu skill ringkas di `.agents/skills/ui-ux-pro-max/SKILL.md`: checklist layout,
 
 - **Type Safety**: Zero `any` unless explicitly wrapping untyped external APIs. All business rules must be strongly typed.
 - **Verification**: Run `npx tsc --noEmit` and `npm run build` to verify every change before committing.
-- **Business Rule Integrity**: Pricing, 5-minute late fee blocks (Rp5.000 capped at Rp120.000 / 24h), and 1 reserve unit per size must always adhere to `docs/01-PRD.md` and `docs/03-DECISIONS.md`.
+- **Business Rule Integrity**: Pricing, 5-minute late fee blocks (Rp5.000 capped at Rp1.440.000 / 24h; items secured by staff beyond 24h), and 1 reserve unit per size must always adhere to `docs/01-PRD.md` and `docs/03-DECISIONS.md`.

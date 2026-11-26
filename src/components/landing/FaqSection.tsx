@@ -10,7 +10,7 @@ const FAQS = [
   {
     num: '01',
     q: 'Bagaimana jika saya telat mengambil barang melewati batas durasi?',
-    a: 'Kamu tetap bisa mengambil barang kapan saja. Denda dihitung Rp5.000 per blok 5 menit (maksimal denda 24 jam sebesar Rp120.000). Bayar denda langsung via QRIS di layar loker sebelum pintu terbuka.',
+    a: 'Kamu tetap bisa mengambil barang kapan saja. Denda dihitung Rp5.000 per blok 5 menit (1–5 menit Rp5.000, 6–10 menit Rp10.000, maks 24 jam sebesar Rp1.440.000). Bayar denda langsung via QRIS sebelum pintu terbuka; jika lewat 24 jam, barang diamankan oleh petugas LocknGo.',
   },
   {
     num: '02',

@@ -123,5 +123,5 @@ lockngo/
 | **Large (L)** | 248 Liter (55 × 50 × 90 cm) | Rp25.000 | Rp50.000 | Rp75.000 | Rp110.000 | Rp150.000 |
 
 - **Perpanjangan Sewa:** +1 Jam (M: Rp7.500, L: Rp13.500) | +3 Jam (M: Rp20.500, L: Rp37.500)
-- **Kelebihan Waktu (Denda):** Rp5.000 per blok 5 menit (dibulatkan ke atas), maks Rp120.000 / 24 jam.
+- **Kelebihan Waktu (Denda):** Rp5.000 per blok 5 menit (dibulatkan ke atas), maks Rp1.440.000 / 24 jam; selebih 24 jam barang diamankan petugas.
 - **Unit Cadangan:** 1 unit per ukuran selalu dikunci untuk keperluan darurat/koreksi.

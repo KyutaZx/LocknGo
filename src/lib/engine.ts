@@ -106,18 +106,17 @@ export function lateCalc(overdueMs: number): LateFeeResult {
 
 export function lateCapped(overdueMs: number): LateFeeResult {
   const L = CFG.late;
-  const day = 86400000;
   const raw = lateCalc(overdueMs);
-  const capped = Math.min(Math.max(overdueMs, 0), L.capHours * 3600000);
-  const fullDays = Math.floor(capped / day);
-  const rem = lateCalc(capped - fullDays * day);
-  const amount = fullDays * L.maxPerDay + Math.min(L.maxPerDay, rem.amount);
+  const capMs = L.capHours * 3600000;
+  const cappedMs = Math.min(Math.max(overdueMs, 0), capMs);
+  const capped = lateCalc(cappedMs);
+  const amount = Math.min(L.maxPerDay, capped.amount);
   return {
     minutes: raw.minutes,
     blocks: raw.blocks,
     amount,
-    atCap: raw.amount > amount,
-    overCap: overdueMs > L.capHours * 3600000,
+    atCap: raw.amount >= L.maxPerDay,
+    overCap: overdueMs > capMs,
   };
 }
 
