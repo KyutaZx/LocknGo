@@ -66,6 +66,10 @@ export class VirtualClock {
     d.setHours(hours, minutes, 0, 0);
     this.offset = d.getTime() - Date.now();
   }
+
+  setNow(targetTs: number): void {
+    this.offset = targetTs - Date.now();
+  }
 }
 
 export const Time = new VirtualClock();

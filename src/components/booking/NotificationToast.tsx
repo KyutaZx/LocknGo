@@ -10,14 +10,21 @@ export interface SimNotification {
   timeLabel: string;
   tone: 'info' | 'success' | 'warning' | 'danger';
   read: boolean;
+  actionLabel?: string;
+  actionType?: 'extend';
 }
 
 interface NotificationToastProps {
   toast: SimNotification | null;
   onDismiss: () => void;
+  onAction?: (notif: SimNotification) => void;
 }
 
-export default function NotificationToast({ toast, onDismiss }: NotificationToastProps) {
+export default function NotificationToast({
+  toast,
+  onDismiss,
+  onAction,
+}: NotificationToastProps) {
   if (!toast) return null;
 
   const iconBg =
@@ -63,6 +70,20 @@ export default function NotificationToast({ toast, onDismiss }: NotificationToas
         </div>
         <div className="text-xs font-extrabold text-bloodwine mt-0.5">{toast.title}</div>
         <p className="text-xs text-ink-muted mt-0.5 leading-relaxed">{toast.message}</p>
+        {toast.actionLabel && onAction && (
+          <div className="mt-2.5">
+            <button
+              type="button"
+              onClick={() => {
+                onAction(toast);
+                onDismiss();
+              }}
+              className="px-3 py-1.5 rounded-xl bg-sunflare hover:bg-sunflare-hover active:scale-[0.98] text-bloodwine font-extrabold text-xs transition-all"
+            >
+              {toast.actionLabel}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

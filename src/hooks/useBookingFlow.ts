@@ -132,7 +132,8 @@ export function useBookingFlow() {
   // Simulated WhatsApp / Push Notifications state
   const [notifications, setNotifications] = useState<SimNotification[]>([]);
   const [activeToast, setActiveToast] = useState<SimNotification | null>(null);
-  const reminderSentRef = useRef(false);
+  const reminder30SentRef = useRef(false);
+  const reminder10SentRef = useRef(false);
   const overdueSentRef = useRef(false);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -141,7 +142,8 @@ export function useBookingFlow() {
       title: string,
       message: string,
       tone: SimNotification['tone'] = 'info',
-      channel: SimNotification['channel'] = 'WhatsApp'
+      channel: SimNotification['channel'] = 'WhatsApp',
+      action?: { label: string; type: 'extend' }
     ) => {
       const notif: SimNotification = {
         id: uid('NF-'),
@@ -151,13 +153,15 @@ export function useBookingFlow() {
         timeLabel: `${fmtClock(Time.now())} WIB`,
         tone,
         read: false,
+        actionLabel: action?.label,
+        actionType: action?.type,
       };
       setNotifications((prev) => [notif, ...prev].slice(0, 15));
       setActiveToast(notif);
       if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
       toastTimerRef.current = setTimeout(() => {
         setActiveToast((curr) => (curr?.id === notif.id ? null : curr));
-      }, 6000);
+      }, action ? 10000 : 6000);
     },
     []
   );
@@ -366,17 +370,37 @@ export function useBookingFlow() {
   const isOverdue = remainingMs < 0;
   const lateInfo = lateCapped(Math.abs(remainingMs));
 
-  // Auto-trigger simulated WhatsApp alerts when active rental nears expiry or becomes overdue
+  // Auto-trigger simulated WhatsApp alerts at 30m, 10m before expiry, and when overdue
   useEffect(() => {
     if (currentStep !== 'active' || !rentalEndAt) return;
 
-    if (remainingMs > 0 && remainingMs <= 15 * 60 * 1000 && !reminderSentRef.current) {
-      reminderSentRef.current = true;
+    if (
+      remainingMs > 10 * 60 * 1000 &&
+      remainingMs <= 30 * 60 * 1000 &&
+      !reminder30SentRef.current
+    ) {
+      reminder30SentRef.current = true;
       pushNotification(
-        'Pengingat 15 Menit',
-        `Sisa waktu sewa loker ${allocatedLocker} di ${loc.name} kurang dari 15 menit. Perpanjang sekarang agar bebas denda.`,
+        'Pengingat 30 Menit',
+        `Sisa waktu sewa loker ${allocatedLocker} di ${loc.name} tinggal 30 menit. Tambah durasi sekarang agar bebas denda.`,
         'warning',
-        'WhatsApp'
+        'WhatsApp',
+        { label: 'Tambah Durasi', type: 'extend' }
+      );
+    }
+
+    if (
+      remainingMs > 0 &&
+      remainingMs <= 10 * 60 * 1000 &&
+      !reminder10SentRef.current
+    ) {
+      reminder10SentRef.current = true;
+      pushNotification(
+        'Pengingat 10 Menit',
+        `Sisa waktu sewa loker ${allocatedLocker} di ${loc.name} tinggal 10 menit. Segera tambah durasi atau ambil barang sebelum denda berjalan.`,
+        'warning',
+        'WhatsApp',
+        { label: 'Tambah Durasi', type: 'extend' }
       );
     }
 
@@ -641,7 +665,8 @@ export function useBookingFlow() {
         setRentalEndAt(now + selectedHours * 3600000);
       }
 
-      reminderSentRef.current = false;
+      reminder30SentRef.current = false;
+      reminder10SentRef.current = false;
       overdueSentRef.current = false;
       setCurrentStep('store');
       setIsDoorOpen(false);
@@ -680,7 +705,7 @@ export function useBookingFlow() {
       refreshAvailability();
       pushNotification(
         'Loker Terkunci Aman',
-        `Pintu loker ${allocatedLocker} di ${loc.name} telah terkunci. Kamu akan diingatkan 15 menit sebelum waktu berakhir.`,
+        `Pintu loker ${allocatedLocker} di ${loc.name} telah terkunci. Kamu akan diingatkan 30 menit dan 10 menit sebelum waktu berakhir.`,
         'success',
         'Sistem'
       );
@@ -716,7 +741,8 @@ export function useBookingFlow() {
         setTotalPaid((p) => p + cost);
       }
 
-      reminderSentRef.current = false;
+      reminder30SentRef.current = false;
+      reminder10SentRef.current = false;
       overdueSentRef.current = false;
       setExtensionSuccess(`Berhasil menambah +${extraHours} Jam (${rupiah(cost)})`);
       pushNotification(
@@ -733,12 +759,57 @@ export function useBookingFlow() {
   const handleSimulateReminderNotif = () => {
     const lockerLabel = allocatedLocker || 'M-02';
     pushNotification(
-      'Pengingat 15 Menit (Simulasi)',
-      `Sisa waktu sewa loker ${lockerLabel} di ${loc.name} tinggal 15 menit. Klik perpanjang di dashboard agar bebas denda.`,
+      'Pengingat 30 Menit (Simulasi)',
+      `Sisa waktu sewa loker ${lockerLabel} di ${loc.name} tinggal 30 menit. Tambah durasi sekarang agar bebas denda.`,
       'warning',
-      'WhatsApp'
+      'WhatsApp',
+      { label: 'Tambah Durasi', type: 'extend' }
     );
   };
+
+  const handleTimeChanged = useCallback(() => {
+    const now = Time.now();
+    setCurrentTime(now);
+    setTimeOffset(Time.getOffset());
+    if (rentalEndAt > 0) {
+      const nextRem = rentalEndAt - now;
+      if (nextRem > 30 * 60 * 1000) reminder30SentRef.current = false;
+      if (nextRem > 10 * 60 * 1000) reminder10SentRef.current = false;
+      if (nextRem > 0) overdueSentRef.current = false;
+    }
+  }, [rentalEndAt]);
+
+  const handleJumpToRemainingMinutes = useCallback(
+    (minutesLeft: number) => {
+      if (!rentalEndAt) return;
+      const targetTs = rentalEndAt - minutesLeft * 60000;
+      Time.setNow(targetTs);
+      if (minutesLeft === 30) reminder30SentRef.current = false;
+      if (minutesLeft === 10) reminder10SentRef.current = false;
+      if (minutesLeft > 0) overdueSentRef.current = false;
+      setCurrentTime(Time.now());
+      setTimeOffset(Time.getOffset());
+      if (currentStep === 'pickup') {
+        setCurrentStep('active');
+      }
+    },
+    [rentalEndAt, currentStep]
+  );
+
+  const handleNotificationAction = useCallback(
+    (notif: SimNotification) => {
+      if (notif.actionType === 'extend') {
+        if (currentStep !== 'active' && rentalEndAt > 0) {
+          setCurrentStep('active');
+        }
+        setTimeout(() => {
+          const el = document.getElementById('extend-duration-section');
+          el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 80);
+      }
+    },
+    [currentStep, rentalEndAt]
+  );
 
   const handleGoToPickup = () => {
     setIsLate(isOverdue);
@@ -1020,5 +1091,8 @@ export function useBookingFlow() {
     dismissToast,
     markAllNotificationsRead,
     handleSimulateReminderNotif,
+    handleTimeChanged,
+    handleJumpToRemainingMinutes,
+    handleNotificationAction,
   };
 }

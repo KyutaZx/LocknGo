@@ -114,6 +114,9 @@ export default function BookingPage() {
     dismissToast,
     markAllNotificationsRead,
     handleSimulateReminderNotif,
+    handleTimeChanged,
+    handleJumpToRemainingMinutes,
+    handleNotificationAction,
   } = useBookingFlow();
 
   return (
@@ -123,11 +126,16 @@ export default function BookingPage() {
         isLoggedIn={isLoggedIn}
         notifications={notifications}
         onMarkNotificationsRead={markAllNotificationsRead}
+        onNotificationAction={handleNotificationAction}
         onReset={handleResetAll}
         onLogout={handleLogout}
       />
 
-      <NotificationToast toast={activeToast} onDismiss={dismissToast} />
+      <NotificationToast
+        toast={activeToast}
+        onDismiss={dismissToast}
+        onAction={handleNotificationAction}
+      />
 
       {/* Main Form Content Wrap */}
       <main
@@ -290,7 +298,7 @@ export default function BookingPage() {
               </div>
 
               {/* Extension Buttons */}
-              <div className="space-y-2">
+              <div id="extend-duration-section" className="space-y-2 scroll-mt-24">
                 <span className="text-xs font-bold uppercase tracking-wider text-ink-muted">
                   Perpanjang Waktu Sewa (Lebih Hemat)
                 </span>
@@ -416,7 +424,11 @@ export default function BookingPage() {
       <TimeSimulatorFooter
         currentTime={currentTime}
         timeOffset={timeOffset}
+        rentalEndAt={rentalEndAt}
+        hasActiveRental={currentStep === 'active' || currentStep === 'pickup'}
         onSimulateNotif={handleSimulateReminderNotif}
+        onJumpToRemainingMinutes={handleJumpToRemainingMinutes}
+        onTimeChanged={handleTimeChanged}
       />
     </div>
   );

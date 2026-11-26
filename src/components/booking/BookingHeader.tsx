@@ -12,6 +12,7 @@ interface BookingHeaderProps {
   isLoggedIn?: boolean;
   notifications?: SimNotification[];
   onMarkNotificationsRead?: () => void;
+  onNotificationAction?: (notif: SimNotification) => void;
   onReset: () => void;
   onLogout?: () => void;
 }
@@ -21,6 +22,7 @@ export default function BookingHeader({
   isLoggedIn,
   notifications = [],
   onMarkNotificationsRead,
+  onNotificationAction,
   onReset,
   onLogout,
 }: BookingHeaderProps) {
@@ -102,7 +104,7 @@ export default function BookingHeader({
                 <div className="max-h-72 overflow-y-auto divide-y divide-ink-line/70">
                   {notifications.length === 0 ? (
                     <div className="py-8 px-4 text-center text-xs text-ink-soft">
-                      Belum ada notifikasi. Pesan OTP, konfirmasi bayar, dan pengingat 15 menit akan muncul di sini.
+                      Belum ada notifikasi. Pesan OTP, konfirmasi bayar, dan pengingat 30 menit / 10 menit akan muncul di sini.
                     </div>
                   ) : (
                     notifications.map((n) => (
@@ -118,6 +120,18 @@ export default function BookingHeader({
                         <p className="text-xs text-ink-muted mt-0.5 leading-relaxed">
                           {n.message}
                         </p>
+                        {n.actionLabel && onNotificationAction && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setNotifOpen(false);
+                              onNotificationAction(n);
+                            }}
+                            className="mt-2 px-3 py-1 rounded-lg bg-sunflare hover:bg-sunflare-hover text-bloodwine font-bold text-[11px] transition-colors"
+                          >
+                            {n.actionLabel}
+                          </button>
+                        )}
                       </div>
                     ))
                   )}
