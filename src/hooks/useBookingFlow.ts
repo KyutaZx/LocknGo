@@ -53,8 +53,8 @@ export const STEP_LABELS: Record<BookingStep, string> = {
 };
 
 export const STEPS_ORDER: BookingStep[] = [
-  'select',
   'login',
+  'select',
   'pay',
   'store',
   'active',
@@ -73,7 +73,7 @@ function mapDbStatusToStep(status: BookingWithLocker['status']): BookingStep {
 
 export function useBookingFlow() {
   const [hydrated, setHydrated] = useState(false);
-  const [currentStep, setCurrentStep] = useState<BookingStep>('select');
+  const [currentStep, setCurrentStep] = useState<BookingStep>('login');
   const [pendingCheckout, setPendingCheckout] = useState(false);
 
   // User state
@@ -851,10 +851,13 @@ export function useBookingFlow() {
     if (currentStep === 'pay' && bookingDbId) {
       await callBookingAction(bookingDbId, { type: 'cancel' });
     }
+    clearBookingSession();
     Time.reset();
     setCurrentTime(Time.now());
     setTimeOffset(0);
-    setCurrentStep('select');
+    setIsLoggedIn(false);
+    setPhoneInput('');
+    setCurrentStep('login');
     setPendingCheckout(false);
     setSelectedLocationId('tp1');
     setSelectedSize('M');
@@ -887,7 +890,7 @@ export function useBookingFlow() {
     refreshAvailability();
     pushNotification(
       'Sesi Direset',
-      'Pilihan lokasi, ukuran, durasi, dan jam simulasi dikembalikan ke awal.',
+      'Semua data sesi dibersihkan dan dikembalikan ke halaman Masuk.',
       'info',
       'Sistem'
     );
@@ -908,7 +911,7 @@ export function useBookingFlow() {
     setGeneratedOtp('123456');
     setPhoneError('');
     setOtpError('');
-    setCurrentStep('select');
+    setCurrentStep('login');
     setPendingCheckout(false);
     setBookingDbId('');
     setRentalId('');

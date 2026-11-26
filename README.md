@@ -57,7 +57,7 @@ Buka browser di [http://localhost:3000](http://localhost:3000):
   - Keamanan & Jaminan (CCTV 24 Jam, Kode Jaga 6 Digit, Asuransi s.d Rp5 Juta).
   - FAQ Accordion interaktif.
 - **Aplikasi Pemesanan (Interactive Booking):** `http://localhost:3000/pesan`
-  - Stepper 7 langkah: Pilih Lokasi/Ukuran/Durasi → Masuk OTP → Bayar QRIS → Simpan (Pintu Terbuka) → Sewa Aktif (Countdown) → Ambil (Verifikasi QR/Kode Jaga & Denda) → Selesai (Nota Transaksi).
+  - Stepper 7 langkah: Masuk OTP → Pilih Lokasi/Ukuran/Durasi → Bayar QRIS → Simpan (Pintu Terbuka) → Sewa Aktif (Countdown) → Ambil (Verifikasi QR/Kode Jaga & Denda) → Selesai (Nota Transaksi).
   - Dilengkapi dock **Jam Virtual Demo** di bagian bawah untuk menguji percepatan waktu (+1j, +3j, +24j) dan kalkulasi denda otomatis.
 
 ### 6. Build Produksi & Deploy ke Vercel

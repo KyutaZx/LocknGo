@@ -135,7 +135,23 @@ export default function BookingPage() {
           currentStep === 'select' ? 'max-w-4xl' : 'max-w-xl'
         } mx-auto w-full px-4 py-8 sm:py-12 flex-1 flex flex-col justify-center`}
       >
-        {/* ================= STEP 1: SELECT ================= */}
+        {/* ================= STEP 1: LOGIN ================= */}
+        {currentStep === 'login' && (
+          <LoginStep
+            phoneInput={phoneInput}
+            setPhoneInput={setPhoneInput}
+            otpInput={otpInput}
+            setOtpInput={setOtpInput}
+            generatedOtp={generatedOtp}
+            setGeneratedOtp={setGeneratedOtp}
+            phoneError={phoneError}
+            otpError={otpError}
+            onRequestOtp={handleRequestOtp}
+            onVerifyOtp={handleVerifyOtp}
+          />
+        )}
+
+        {/* ================= STEP 2: SELECT ================= */}
         {currentStep === 'select' && (
           <ConfigureStep
             selectedLocationId={selectedLocationId}
@@ -153,25 +169,7 @@ export default function BookingPage() {
             actionError={actionError}
             resetSignal={resetSignal}
             isLoggedIn={isLoggedIn}
-            onOpenLoginCheck={handleOpenLoginCheck}
             onProceedToPay={handleProceedToPay}
-          />
-        )}
-
-        {/* ================= STEP 2: LOGIN ================= */}
-        {currentStep === 'login' && (
-          <LoginStep
-            phoneInput={phoneInput}
-            setPhoneInput={setPhoneInput}
-            otpInput={otpInput}
-            setOtpInput={setOtpInput}
-            generatedOtp={generatedOtp}
-            setGeneratedOtp={setGeneratedOtp}
-            phoneError={phoneError}
-            otpError={otpError}
-            onRequestOtp={handleRequestOtp}
-            onVerifyOtp={handleVerifyOtp}
-            onBack={handleBackFromLogin}
           />
         )}
 
