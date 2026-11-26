@@ -1,6 +1,6 @@
 # LocknGo — Fullstack Web App (Next.js + TypeScript + Supabase)
 
-Layanan penitipan barang pintar (smart locker) mandiri di Surabaya. Dibuat untuk proyek bisnis **Venture Creation — Kelompok 3**.
+Layanan penitipan barang pintar (smart locker) mandiri. Dibuat untuk proyek bisnis **Venture Creation — Kelompok 3**.
 
 ---
 
