@@ -510,8 +510,8 @@ export function useBookingFlow() {
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (otpInput.trim() !== generatedOtp && otpInput.trim() !== '123456') {
-      setOtpError('Kode OTP salah. Masukkan 6 digit yang sesuai.');
+    if (!generatedOtp || generatedOtp === '123456' || otpInput.trim() !== generatedOtp) {
+      setOtpError('Kode OTP tidak cocok. Masukkan 6 digit kode yang dikirim.');
       return;
     }
     setOtpError('');
