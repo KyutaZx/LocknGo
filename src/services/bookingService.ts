@@ -497,28 +497,29 @@ export async function createBooking(
     };
   }
 
-  await supabase.from('payments').insert({
-    booking_id: booking.id,
-    payment_type: 'initial_booking',
-    amount: basePrice,
-    qris_reference: `QRIS-${bookingCode}`,
-    qris_string:
-      '00020101021126590014ID.LINKAJA.WWW01189360091800000000005204581253033605802ID5908LOCKNGO6008SURABAYA62070703A01630489F3',
-    status: 'pending',
-  });
-
-  await logActivity(
-    booking.id,
-    'booking_created',
-    `Pemesanan ${bookingCode} dibuat untuk unit ${claimedLocker.unit_number} (${hours} Jam).`,
-    {
-      location_id: locationId,
-      unit_number: claimedLocker.unit_number,
-      size,
-      duration_hours: hours,
-      base_price: basePrice,
-    }
-  );
+  await Promise.all([
+    supabase.from('payments').insert({
+      booking_id: booking.id,
+      payment_type: 'initial_booking',
+      amount: basePrice,
+      qris_reference: `QRIS-${bookingCode}`,
+      qris_string:
+        '00020101021126590014ID.LINKAJA.WWW01189360091800000000005204581253033605802ID5908LOCKNGO6008SURABAYA62070703A01630489F3',
+      status: 'pending',
+    }),
+    logActivity(
+      booking.id,
+      'booking_created',
+      `Pemesanan ${bookingCode} dibuat untuk unit ${claimedLocker.unit_number} (${hours} Jam).`,
+      {
+        location_id: locationId,
+        unit_number: claimedLocker.unit_number,
+        size,
+        duration_hours: hours,
+        base_price: basePrice,
+      }
+    ),
+  ]);
 
   return {
     success: true,
@@ -604,20 +605,33 @@ export async function performBookingAction(
     const endIso = new Date(startMs + booking.duration_hours * 3600000).toISOString();
     const amount = Number(booking.base_price);
 
-    const { data: updated, error } = await supabase
-      .from('bookings')
-      .update({
-        status: 'paid_unclaimed',
-        total_paid: amount,
-        rental_starts_at: startIso,
-        rental_ends_at: endIso,
-        updated_at: nowIso,
-      })
-      .eq('id', booking.id)
-      .select('*')
-      .single();
+    const [bookingRes] = await Promise.all([
+      supabase
+        .from('bookings')
+        .update({
+          status: 'paid_unclaimed',
+          total_paid: amount,
+          rental_starts_at: startIso,
+          rental_ends_at: endIso,
+          updated_at: nowIso,
+        })
+        .eq('id', booking.id)
+        .select('*')
+        .single(),
+      supabase
+        .from('payments')
+        .update({ status: 'settlement', settled_at: nowIso })
+        .eq('booking_id', booking.id)
+        .eq('payment_type', 'initial_booking'),
+      logActivity(
+        booking.id,
+        'payment_settled',
+        `Pembayaran QRIS ${booking.booking_code} lunas (${amount}).`,
+        { amount, unit_number: unitNumber }
+      ),
+    ]);
 
-    if (error || !updated) {
+    if (bookingRes.error || !bookingRes.data) {
       return {
         success: false,
         error: 'Gagal memperbarui status pembayaran.',
@@ -625,22 +639,9 @@ export async function performBookingAction(
       };
     }
 
-    await supabase
-      .from('payments')
-      .update({ status: 'settlement', settled_at: nowIso })
-      .eq('booking_id', booking.id)
-      .eq('payment_type', 'initial_booking');
-
-    await logActivity(
-      booking.id,
-      'payment_settled',
-      `Pembayaran QRIS ${booking.booking_code} lunas (${amount}).`,
-      { amount, unit_number: unitNumber }
-    );
-
     return {
       success: true,
-      data: toBookingWithLocker(updated, unitNumber),
+      data: toBookingWithLocker(bookingRes.data, unitNumber),
       statusCode: 200,
       persistence: 'supabase',
     };
@@ -682,17 +683,39 @@ export async function performBookingAction(
   }
 
   if (action.type === 'activate') {
-    const { data: updated, error } = await supabase
-      .from('bookings')
-      .update({
-        status: 'active',
-        updated_at: nowIso,
-      })
-      .eq('id', booking.id)
-      .select('*')
-      .single();
+    const tasks: Promise<unknown>[] = [
+      logActivity(
+        booking.id,
+        'locker_activated',
+        `Pintu loker ${unitNumber} terkunci dan sewa aktif.`,
+        { unit_number: unitNumber }
+      ),
+    ];
+    if (booking.locker_id) {
+      tasks.push(
+        Promise.resolve(
+          supabase
+            .from('lockers')
+            .update({ status: 'occupied', updated_at: nowIso })
+            .eq('id', booking.locker_id)
+        )
+      );
+    }
 
-    if (error || !updated) {
+    const [bookingRes] = await Promise.all([
+      supabase
+        .from('bookings')
+        .update({
+          status: 'active',
+          updated_at: nowIso,
+        })
+        .eq('id', booking.id)
+        .select('*')
+        .single(),
+      ...tasks,
+    ]);
+
+    if (bookingRes.error || !bookingRes.data) {
       return {
         success: false,
         error: 'Gagal mengaktifkan status sewa loker.',
@@ -700,23 +723,9 @@ export async function performBookingAction(
       };
     }
 
-    if (booking.locker_id) {
-      await supabase
-        .from('lockers')
-        .update({ status: 'occupied', updated_at: nowIso })
-        .eq('id', booking.locker_id);
-    }
-
-    await logActivity(
-      booking.id,
-      'locker_activated',
-      `Pintu loker ${unitNumber} terkunci dan sewa aktif.`,
-      { unit_number: unitNumber }
-    );
-
     return {
       success: true,
-      data: toBookingWithLocker(updated, unitNumber),
+      data: toBookingWithLocker(bookingRes.data, unitNumber),
       statusCode: 200,
       persistence: 'supabase',
     };
@@ -740,19 +749,35 @@ export async function performBookingAction(
     const newExtendPrice = Number(booking.extend_price) + cost;
     const newTotalPaid = Number(booking.total_paid) + cost;
 
-    const { data: updated, error } = await supabase
-      .from('bookings')
-      .update({
-        extend_price: newExtendPrice,
-        total_paid: newTotalPaid,
-        rental_ends_at: newEndIso,
-        updated_at: nowIso,
-      })
-      .eq('id', booking.id)
-      .select('*')
-      .single();
+    const [bookingRes] = await Promise.all([
+      supabase
+        .from('bookings')
+        .update({
+          extend_price: newExtendPrice,
+          total_paid: newTotalPaid,
+          rental_ends_at: newEndIso,
+          updated_at: nowIso,
+        })
+        .eq('id', booking.id)
+        .select('*')
+        .single(),
+      supabase.from('payments').insert({
+        booking_id: booking.id,
+        payment_type: 'extend',
+        amount: cost,
+        qris_reference: `EXT-${booking.booking_code}-${Date.now()}`,
+        status: 'settlement',
+        settled_at: nowIso,
+      }),
+      logActivity(
+        booking.id,
+        'rental_extended',
+        `Durasi loker ${unitNumber} diperpanjang +${extraHours} Jam (${cost}).`,
+        { extra_hours: extraHours, cost, unit_number: unitNumber }
+      ),
+    ]);
 
-    if (error || !updated) {
+    if (bookingRes.error || !bookingRes.data) {
       return {
         success: false,
         error: 'Gagal menyimpan perpanjangan waktu sewa.',
@@ -760,25 +785,9 @@ export async function performBookingAction(
       };
     }
 
-    await supabase.from('payments').insert({
-      booking_id: booking.id,
-      payment_type: 'extend',
-      amount: cost,
-      qris_reference: `EXT-${booking.booking_code}-${Date.now()}`,
-      status: 'settlement',
-      settled_at: nowIso,
-    });
-
-    await logActivity(
-      booking.id,
-      'rental_extended',
-      `Durasi loker ${unitNumber} diperpanjang +${extraHours} Jam (${cost}).`,
-      { extra_hours: extraHours, cost, unit_number: unitNumber }
-    );
-
     return {
       success: true,
-      data: toBookingWithLocker(updated, unitNumber),
+      data: toBookingWithLocker(bookingRes.data, unitNumber),
       statusCode: 200,
       persistence: 'supabase',
     };
@@ -877,18 +886,40 @@ export async function performBookingAction(
 
   if (action.type === 'complete') {
     const completedIso = new Date(action.nowMs ?? Date.now()).toISOString();
-    const { data: updated, error } = await supabase
-      .from('bookings')
-      .update({
-        status: 'completed',
-        completed_at: completedIso,
-        updated_at: nowIso,
-      })
-      .eq('id', booking.id)
-      .select('*')
-      .single();
+    const tasks: Promise<unknown>[] = [
+      logActivity(
+        booking.id,
+        'rental_completed',
+        `Sewa loker ${unitNumber} selesai dan unit kembali tersedia.`,
+        { unit_number: unitNumber, total_paid: Number(booking.total_paid) }
+      ),
+    ];
+    if (booking.locker_id) {
+      tasks.push(
+        Promise.resolve(
+          supabase
+            .from('lockers')
+            .update({ status: 'ready', updated_at: nowIso })
+            .eq('id', booking.locker_id)
+        )
+      );
+    }
 
-    if (error || !updated) {
+    const [bookingRes] = await Promise.all([
+      supabase
+        .from('bookings')
+        .update({
+          status: 'completed',
+          completed_at: completedIso,
+          updated_at: nowIso,
+        })
+        .eq('id', booking.id)
+        .select('*')
+        .single(),
+      ...tasks,
+    ]);
+
+    if (bookingRes.error || !bookingRes.data) {
       return {
         success: false,
         error: 'Gagal menyelesaikan sesi sewa.',
@@ -896,23 +927,9 @@ export async function performBookingAction(
       };
     }
 
-    if (booking.locker_id) {
-      await supabase
-        .from('lockers')
-        .update({ status: 'ready', updated_at: nowIso })
-        .eq('id', booking.locker_id);
-    }
-
-    await logActivity(
-      booking.id,
-      'rental_completed',
-      `Sewa loker ${unitNumber} selesai dan unit kembali tersedia.`,
-      { unit_number: unitNumber, total_paid: Number(updated.total_paid) }
-    );
-
     return {
       success: true,
-      data: toBookingWithLocker(updated, unitNumber),
+      data: toBookingWithLocker(bookingRes.data, unitNumber),
       statusCode: 200,
       persistence: 'supabase',
     };
