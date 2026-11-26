@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
-import { X, Clock } from 'lucide-react';
+import { X, Clock, Download, Check } from 'lucide-react';
 import { rupiah, fmtDateTime, pad } from '@/lib/engine';
 
 const EXTEND_QR_TIMEOUT_SECONDS = 300; // 5 menit
@@ -32,6 +32,7 @@ export default function ExtendPaymentModal({
 }: ExtendPaymentModalProps) {
   const [qrUrl, setQrUrl] = useState('');
   const [secondsLeft, setSecondsLeft] = useState(EXTEND_QR_TIMEOUT_SECONDS);
+  const [downloaded, setDownloaded] = useState(false);
 
   useEffect(() => {
     QRCode.toDataURL(
@@ -51,6 +52,73 @@ export default function ExtendPaymentModal({
   const mins = Math.floor(secondsLeft / 60);
   const secs = secondsLeft % 60;
   const isExpired = secondsLeft <= 0;
+
+  const triggerDownload = (dataUrl: string) => {
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = `LocknGo-QRIS-Perpanjang-${allocatedLocker}-${rentalId || 'extend'}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setDownloaded(true);
+    setTimeout(() => setDownloaded(false), 2000);
+  };
+
+  const handleDownloadQr = () => {
+    if (!qrUrl || isExpired) return;
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const width = 600;
+      const height = 760;
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        triggerDownload(qrUrl);
+        return;
+      }
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, width, height);
+      ctx.fillStyle = '#780115';
+      ctx.fillRect(0, 0, width, 16);
+      ctx.fillStyle = '#780115';
+      ctx.font = 'bold 30px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('LocknGo QRIS Perpanjangan', width / 2, 74);
+      ctx.fillStyle = '#6E6268';
+      ctx.font = '18px sans-serif';
+      ctx.fillText(
+        `${locationName} · Loker ${allocatedLocker} (+${extraHours} Jam)`,
+        width / 2,
+        108
+      );
+      const qrSize = 400;
+      ctx.drawImage(img, (width - qrSize) / 2, 140, qrSize, qrSize);
+      ctx.fillStyle = '#2B1A1D';
+      ctx.font = 'bold 18px monospace';
+      ctx.fillText('NMID: ID102003884990', width / 2, 578);
+      ctx.strokeStyle = '#EADFE2';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(80, 610);
+      ctx.lineTo(width - 80, 610);
+      ctx.stroke();
+      ctx.fillStyle = '#6E6268';
+      ctx.font = '18px sans-serif';
+      ctx.fillText('Total Perpanjangan', width / 2, 650);
+      ctx.fillStyle = '#780115';
+      ctx.font = 'bold 36px monospace';
+      ctx.fillText(rupiah(amount), width / 2, 698);
+      ctx.fillStyle = '#6E6268';
+      ctx.font = '14px monospace';
+      ctx.fillText(`Ref: ${rentalId || 'LOCKNGO'}`, width / 2, 734);
+      triggerDownload(canvas.toDataURL('image/png'));
+    };
+    img.onerror = () => triggerDownload(qrUrl);
+    img.src = qrUrl;
+  };
 
   return (
     <div
@@ -99,8 +167,8 @@ export default function ExtendPaymentModal({
             </span>
           </div>
 
-          {/* QR Code */}
-          <div className="flex flex-col items-center">
+          {/* QR Code + Download */}
+          <div className="flex flex-col items-center space-y-2.5">
             <div className="bg-white p-3.5 rounded-2xl border border-ink-line shadow-sm">
               {qrUrl ? (
                 <img
@@ -119,6 +187,25 @@ export default function ExtendPaymentModal({
                 NMID: ID102003884990
               </div>
             </div>
+
+            <button
+              type="button"
+              disabled={!qrUrl || isExpired}
+              onClick={handleDownloadQr}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-ink-line bg-white hover:bg-cream hover:border-bloodwine/40 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-bold text-bloodwine transition-all active:scale-[0.98]"
+            >
+              {downloaded ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>QRIS Tersimpan</span>
+                </>
+              ) : (
+                <>
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Unduh QRIS (.PNG)</span>
+                </>
+              )}
+            </button>
           </div>
 
           {/* Summary */}
