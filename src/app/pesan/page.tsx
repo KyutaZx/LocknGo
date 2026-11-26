@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { CFG } from '@/lib/data';
 import {
@@ -21,6 +22,7 @@ import ConfigureStep from '@/components/booking/ConfigureStep';
 import PaymentStep from '@/components/booking/PaymentStep';
 import StoreStep from '@/components/booking/StoreStep';
 import PickupStep from '@/components/booking/PickupStep';
+import ExtendPaymentModal from '@/components/booking/ExtendPaymentModal';
 import NotificationToast from '@/components/booking/NotificationToast';
 import {
   ArrowRight,
@@ -118,6 +120,14 @@ export default function BookingPage() {
     handleJumpToRemainingMinutes,
     handleNotificationAction,
   } = useBookingFlow();
+
+  const [pendingExtendHours, setPendingExtendHours] = useState<number | null>(null);
+
+  const handleConfirmExtendPayment = async () => {
+    if (!pendingExtendHours) return;
+    await handleExtendRental(pendingExtendHours);
+    setPendingExtendHours(null);
+  };
 
   return (
     <div className="min-h-screen bg-cream flex flex-col justify-between">
@@ -305,14 +315,14 @@ export default function BookingPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     type="button"
-                    onClick={() => handleExtendRental(1)}
+                    onClick={() => setPendingExtendHours(1)}
                     className="py-3 px-3 rounded-xl border border-bloodwine hover:bg-sunflare-light text-bloodwine font-bold text-xs transition-colors flex items-center justify-center gap-1.5"
                   >
                     +1 Jam ({rupiah(extendPrice(selectedSize, 1))})
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleExtendRental(3)}
+                    onClick={() => setPendingExtendHours(3)}
                     className="py-3 px-3 rounded-xl border border-bloodwine hover:bg-sunflare-light text-bloodwine font-bold text-xs transition-colors flex items-center justify-center gap-1.5"
                   >
                     +3 Jam ({rupiah(extendPrice(selectedSize, 3))})
@@ -430,6 +440,20 @@ export default function BookingPage() {
         onJumpToRemainingMinutes={handleJumpToRemainingMinutes}
         onTimeChanged={handleTimeChanged}
       />
+
+      {pendingExtendHours !== null && (
+        <ExtendPaymentModal
+          extraHours={pendingExtendHours}
+          amount={extendPrice(selectedSize, pendingExtendHours)}
+          allocatedLocker={allocatedLocker}
+          rentalId={rentalId}
+          locationName={loc.name}
+          newEndAt={rentalEndAt + pendingExtendHours * 3600000}
+          isSubmitting={isSubmitting}
+          onConfirmPay={handleConfirmExtendPayment}
+          onCancel={() => setPendingExtendHours(null)}
+        />
+      )}
     </div>
   );
 }
