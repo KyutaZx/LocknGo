@@ -1,8 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Bell, SlidersHorizontal, X } from 'lucide-react';
-import { Time, fmtClock, pad } from '@/lib/engine';
+import { Bell } from 'lucide-react';
+import { Time, fmtClock } from '@/lib/engine';
 
 interface TimeSimulatorFooterProps {
   currentTime: number;
@@ -35,13 +34,6 @@ export default function TimeSimulatorFooter({
   onJumpToRemainingMinutes,
   onTimeChanged,
 }: TimeSimulatorFooterProps) {
-  const [editOpen, setEditOpen] = useState(false);
-  const [customMinutes, setCustomMinutes] = useState('30');
-  const [customClock, setCustomClock] = useState(() => {
-    const d = new Date(currentTime);
-    return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  });
-
   const advance = (ms: number) => {
     Time.advance(ms);
     onTimeChanged?.();
@@ -52,84 +44,10 @@ export default function TimeSimulatorFooter({
     onTimeChanged?.();
   };
 
-  const handleApplyMinutes = (e: React.FormEvent) => {
-    e.preventDefault();
-    const mins = Number(customMinutes);
-    if (!Number.isFinite(mins) || mins === 0) return;
-    advance(mins * 60000);
-    setEditOpen(false);
-  };
-
-  const handleApplyClock = (e: React.FormEvent) => {
-    e.preventDefault();
-    const [hh, mm] = customClock.split(':').map(Number);
-    if (!Number.isFinite(hh) || !Number.isFinite(mm)) return;
-    Time.setClock(hh, mm);
-    onTimeChanged?.();
-    setEditOpen(false);
-  };
-
   const offsetText = formatOffsetLabel(timeOffset);
 
   return (
-    <footer className="relative bg-bloodwine-deep/95 backdrop-blur-md text-white py-3 px-4 border-t border-white/10">
-      {/* Custom Time Editor Drawer */}
-      {editOpen && (
-        <div className="max-w-5xl mx-auto mb-3 p-3.5 rounded-2xl bg-black/35 border border-white/15 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-          <div className="flex flex-wrap items-center gap-3">
-            <form onSubmit={handleApplyMinutes} className="flex items-center gap-1.5">
-              <label htmlFor="sim-custom-min" className="text-white/75 text-[11px] font-semibold">
-                Maju menit:
-              </label>
-              <input
-                id="sim-custom-min"
-                type="number"
-                value={customMinutes}
-                onChange={(e) => setCustomMinutes(e.target.value)}
-                className="w-20 px-2.5 py-1.5 rounded-lg bg-white/10 border border-white/20 text-white font-mono text-xs focus:outline-none focus:border-sunflare"
-                placeholder="30"
-              />
-              <button
-                type="submit"
-                className="px-2.5 py-1.5 rounded-lg bg-sunflare hover:bg-sunflare-hover text-bloodwine font-bold text-[11px] transition-colors"
-              >
-                Terapkan
-              </button>
-            </form>
-
-            <span className="text-white/30 hidden sm:inline">|</span>
-
-            <form onSubmit={handleApplyClock} className="flex items-center gap-1.5">
-              <label htmlFor="sim-custom-clock" className="text-white/75 text-[11px] font-semibold">
-                Atur jam:
-              </label>
-              <input
-                id="sim-custom-clock"
-                type="time"
-                value={customClock}
-                onChange={(e) => setCustomClock(e.target.value)}
-                className="px-2.5 py-1.5 rounded-lg bg-white/10 border border-white/20 text-white font-mono text-xs focus:outline-none focus:border-sunflare"
-              />
-              <button
-                type="submit"
-                className="px-2.5 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-white font-bold text-[11px] transition-colors"
-              >
-                Set Jam
-              </button>
-            </form>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setEditOpen(false)}
-            aria-label="Tutup edit waktu"
-            className="self-end sm:self-auto p-1 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      )}
-
+    <footer className="bg-bloodwine-deep/95 backdrop-blur-md text-white py-3 px-4 border-t border-white/10">
       <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs">
         <div className="flex items-center gap-2.5">
           <span className="w-2 h-2 rounded-full bg-sunflare animate-pulse" />
@@ -214,23 +132,6 @@ export default function TimeSimulatorFooter({
             title="Maju 24 Jam"
           >
             +24 Jam
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              const d = new Date(currentTime);
-              setCustomClock(`${pad(d.getHours())}:${pad(d.getMinutes())}`);
-              setEditOpen((o) => !o);
-            }}
-            className={`px-2.5 py-1.5 rounded-lg font-bold text-[11px] transition-colors inline-flex items-center gap-1 border ${
-              editOpen
-                ? 'bg-white text-bloodwine border-white'
-                : 'bg-white/10 hover:bg-white/20 text-white border-white/15'
-            }`}
-            title="Edit simulasi waktu secara kustom (menit atau jam)"
-          >
-            <SlidersHorizontal className="w-3 h-3" />
-            <span>Edit</span>
           </button>
           <button
             type="button"
