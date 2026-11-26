@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+video/node_modules/
+
+# Next.js build output
+.next/
+out/
+
+# TypeScript cache
+*.tsbuildinfo
+next-env.d.ts
+
+# Environment variables (keep example template only)
+.env
+.env.*
+!.env.local.example
+
+# Rendered media outputs & local video agent cache
+video/out/
+video/.agents/
+
+# Logs & OS clutter
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+.DS_Store
+Thumbs.db

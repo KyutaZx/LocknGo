@@ -1,0 +1,261 @@
+LocknGo
+
+LocknGo adalah layanan penitipan barang menggunakan loker otomatis yang tersedia di tempat-tempat ramai di Surabaya. Pelanggan cukup memesan dan membayar melalui aplikasi, kemudian membuka loker secara mandiri menggunakan QR Code untuk menyimpan atau mengambil barang. 
+
+Masalah
+
+Orang yang sedang belanja di mall bawa banyak barang seperti stroller namun ternyata tidak terpakai karena buah hati mau gendong atau jalan sendiri, memiliki profesi sebagai jastipers, transit kereta api, penggiat olaharaga outdoor atau ke event repot membawa koper, tas, belanjaan dan barang lainnya
+
+Yang kita jual 
+
+Sewa loker ukuran Medium (ransel, paper bag) dan Large (koper, banyak shopping bag, stroller) untuk 1, 3, 6, 12, atau 24 jam.  
+
+Target pasar
+
+Wisatawan transit, pembelanja banyak, jastiper, pengunjung mall dengan stroller, penggiat olahraga outdoor dan pengunjung event.
+
+Cara pakai
+
+Pesan dan bayar QRIS di aplikasi (bisa dari jauh), terima QR code, scan untuk membuka dan menutup loker. Kalau waktu habis, bayar kelebihan dulu sebelum loker terbuka. 
+
+Implementasi loker
+
+Dibuatulai sebagai web app yang dibuka lewat browser, tanpa instal. Dapat diakses dari mana saja, karena 1-2 tab layar untuk pemesanan di loker secara langsung akan membuat antrean, padahal pelanggan stasiun sering buru-buru. Dengan aplikasi, tiap orang membuka lokernya sendiri
+
+Kenapa belum ada di mall surabaya?
+
+Berdasar observasi ke pihak mall (security) ada indikasi bahwa risiko keamanan, siapa yang tanggung jawab kalau hilang, biaya operasional.
+
+Hasil observasi ke pihak mall 
+
+Pertanyaan
+
+Jawaban
+
+Di mall ini apakah pernah ada layanan penitipan barang untuk pengunjung, selain menitipkan helm?
+
+Tidak ada, beberapa ada yang tanya, tapi kita hanya menyediakan penitipan di lobby itu pun di bagian customer service dan pakai rak
+
+Apakah sering pengunjung bertanya soal titip koper atau tas belanja? Hari dan jam apa kira kira yang paling ramai? 
+
+Beberapa kali ada dan biasanya di weekend atau long weekend, asumsi saya orang luar kota yang berkunjung kesini, karena kalau orang surabaya mungkin sudah tau ya kita ga ada penitipan jadi tau gimana aturnya gitu
+
+Menurut Bapak, apa kekhawatiran kalau ada loker penitipan di mall? 
+
+Barang berbahaya atau terlarang, tanggung jawab kalau hilang, perlu petugas jaga. 
+
+Kalau ada pihak luar yang mau mendirikan bisnis sewa loker di mall ini prosedurnya bagaimana ya pak? 
+
+Sepertinya bisa lewat marketing seperti itu, tapi kalau ini untuk tugas kampus harus ada surat keterangan dari kampus terkait dan tentunya ada biaya sewa
+
+Keamanan
+
+Loker baja berkunci elektronik, QR sekali pakai, sensor pintu dan sensor isi, CCTV, log, satu petugas paruh waktu, dan pemantauan dari jauh.
+
+Resiko
+
+Target lokasi menolak, pengguna sepi, barang hilang, barang terlarang, listrik atau internet mati.
+
+Ukuran loker
+
+Medium (M)
+
+55 x 50 x 90 cm
+
+1 ransel sampai 50 cm, atau 2 sampai 3 paper bag sedang
+
+Large (L)
+
+55 x 50 x 45 cm
+
+1 koper sampai 32 inci berdiri, stroller bayi (dilipat) atau 4 sampai 6 shopping bag
+
+UKURAN MASIH PERKIRAAN AJA
+
+Tarif
+
+UK
+
+1 JAM
+
+3 JAM
+
+6 JAM
+
+12 JAM 
+
+24 JAM
+
+Medium (M)
+
+Rp15.000
+
+Rp35.000
+
+Rp55.000
+
+Rp80.000
+
+Rp120.000
+
+Large (L)
+
+Rp25.000
+
+Rp50.000
+
+Rp75.000
+
+Rp110.000
+
+Rp150.000
+
+Cara pakai
+
+Titip barang: Waktu sewa dihitung dari pintu barang terkunci dengan barang di dalamnya, bukan sejak pelanggan bayar
+
+Pelanggan membuka aplikasi dan login dengan nomor HP (kode OTP).
+
+Pelanggan memilih ukuran (M atau L), lama sewa (3, 6, 12, atau 24 jam)
+
+Aplikasi menampilkan panduan ukuran dan total biaya. Pelanggan menyetujui daftar barang terlarang.
+
+Pelanggan membayar lewat QRIS. Setelah pembayaran berhasil, aplikasi menampilkan QR beserta kode akses, kode akses digunakan untuk backup apabila QR sulit di scan.
+
+Di lokasi, pelanggan memindai QR di pembaca pada tab loker, apabila QR sulit terpindai oleh pembaca pada tab, pengguna dapat mengganti pilihan ke akses menggunakan kode. Pintu loker terbuka. 
+
+Pelanggan memasukkan barang dan menutup pintu. Pintu terkunci otomatis. Waktu sewa mulai dihitung saat ini. Aplikasi menampilkan nomor loker, jam berakhir, dan hitung mundur.
+
+Lupa memasukkan sesuatu? Loker dapat dibuka kembali dengan QR. 
+
+Ambil barang: Pelanggan mengambil barang lewat QR yang sama.
+
+Pelanggan scan QR ke tab loker
+
+Jam sewa akan berhenti saat QR di pindai oleh tab.
+
+Tab loker memeriksa apakah jam sewa masih tersisa, tepat habis atau sudah lewat. 
+
+Kalau waktu sewa masih tersisa >= 5 menit maka terdapat pilihan tombol finish dan pickup. Apabila finish pintu langsung terbuka tanpa membayar denda. Apabila pickup (mengambil barang sebagian), waktu sewa akan berjalan lagi setelah pintu ditutup kembali. 
+
+Kalau waktu sewa tersisa < 5 menit dan tepat habis maka hanya terdapat pilihan finish, pintu terbuka tanpa membayar denda.
+
+Kalau sudah lewat jam sewa hanya ada pilihan finish, maka akan di kalkulasikan charge. Penyewa bayar charge terlebih dahulu, baru loker dapat terbuka.
+
+Akan ada reminder berupa notifikasi melalui web app di browser dan whatsapp (berdasar nomor yang digunakan untuk Log in web). Notifikasi tersebut sebagai pengingat durasi jam sewa, ia akan muncul pada 30 menit dan 10 menit sebelum durasi sewa berakhir. Untuk notifikasi melalui whatsapp broadcastnya berisi perkenalan dari lockngo, dan mengingatkan sisa waktu, beri intruksi tambahan kalau mau tambah jam sewa bisa klik link berikut (berisi link web untuk akses kembali web nya). Tombol “Tambah sewa” hanya muncul pada saat reminder itu tadi, selain itu ia tidak pernah muncul. Saat waktu habis, pemberitahuan terakhir menyebutkan bahwa tarif kelebihan mulai berjalan.
+
+Apabila telah melewati waktu sewa dan tarif kelebihan berjalan, akan ada reminder untuk mengingatkan user bahwa waktu sewa telah habis dan tarif kelebihan sedang berjalan. Disini tombol tambah sewa tidak berlaku. 
+
+Waktu sewa: Tidak ada toleransi telat. Telat 1 menit sudah kena biaya. Karena itu reminder diharapkan bisa membantu pelanggan supaya tidak telat.
+
+Biaya kelebihan waktu: Waktu telat diukur saat QR discan di loker. Angka di tabel adalah total yang dibayar.
+
+Keterlambatan
+
+Charge
+
+Total Denda
+
+1-5 menit
+
+1 x Rp5.000
+
+Rp5.000
+
+6-10 menit
+
+2 x Rp5.000
+
+Rp10.000
+
+11-15 menit
+
+3 x Rp5.000
+
+Rp15.000
+
+30 menit
+
+Rp60.000
+
+Rp60.000
+
+Biaya dikunci 5 menit sejak tagihan muncul. Pelanggan yang membayar di menit ke-4 tetap membayar tarif yang tertera.
+
+Kalau masalah ada di sistem kita (loker offline, pembayaran tertunda dari pihak kita, QR gagal terbaca), kelebihan waktu tidak ditagih. Gangguan dicatat di log.
+
+Batas kelebihan 24 jam. Setelah itu petugas mengamankan barang sesuai syarat dan ketentuan dan menyimpannya 7 hari.
+
+Selesai lebih awal tidak mengembalikan sisa waktu.
+
+Reminder: Aplikasi mengirim pemberitahuan 30 menit dan 10 menit sebelum sewa habis, masing-masing dengan tombol Tambah durasi. Saat waktu habis, pemberitahuan terakhir menyebutkan bahwa tarif kelebihan mulai berjalan.
+
+Tambah durasi
+
+Tambahan
+
+Medium (M)
+
+Large (L)
+
+1 Jam
+
+Rp7.500
+
+Rp13.500
+
+3 jam 
+
+Rp20.500
+
+Rp37.500
+
+Jam berakhir yang baru adalah jam berakhir lama ditambah durasi tambahan. Pengingat dijadwalkan ulang dari jam yang baru.
+
+Tambah durasi hanya bisa sebelum sewa berakhir di reminder 30 sama 10 menit tadi.
+
+Memperpanjang sebelum habis selalu sama murahnya atau lebih murah daripada telat. Itu sengaja, supaya pelanggan memilih menambah durasi.
+
+Booking: Pelanggan boleh memesan dari jauh, misalnya wisatawan yang masih di kereta. Namun terdapat aturan yang berlaku.
+
+Hal
+
+Aturan
+
+Kapan boleh pesan
+
+Maksimal 1 jam sebelum jam sewa
+
+Masa tahan loker
+
+30 menit setelah jam sewa. Dapat di perpanjang 10 menit sebanyak satu kali, gratis, lewat web app
+
+Batal 2 jam atau lebih sebelum jam kedatangan
+
+Uang kembali 100%
+
+Batal kurang dari 2 jam
+
+Uang kembali 50%, reservasi hangus, loker berstatus available
+
+Gak dateng dan konfirm
+
+HANGUS
+
+Cara kerja loker
+
+Nomor loker ditetapkan saat pelanggan tiba dan scan QR, bukan waktu booking.
+
+Case
+
+Kondisi
+
+Yang terjadi
+
+Finish tepat waktu, ada barang tertinggal
+
+Waktu koreksi 10 menit sejak pintu tertutup. Customer dapat notif, petugas juga bisa liat status lokernya. Cust bisa ambil barang yang tertinggal di petugas. Apabila pelanggan kembali sebelum 10 menit maka barang dapat di ambil ke petugas dengan gratis. Apabila lebih dari 10 menit baru kembali,  maka pelanggan harus membayar denda sesuai dengan tarif kelebihan setelah 10 menit itu tadi. 
+
+Pelanggan pergi dan tidak kembali
+
+Tarif kelebihan berjalan sampai batas 24 jam, dengan pengingat berkala. Setelah itu petugas mengamankan barang dan menyimpannya 7 hari. Pelanggan yang datang mengambil barangnya lebih dari 24 jam harus membayar denda dengan nominal telat 24 jam, karena batas maksimal dihitung telat adalah 24 jam. Apabila baru diambil 2 hari kemudian, penyewa tetep membayar charge sebesar 24 jam saja. 
