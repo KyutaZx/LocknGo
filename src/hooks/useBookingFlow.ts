@@ -89,6 +89,7 @@ export function useBookingFlow() {
   const [selectedSize, setSelectedSize] = useState<LockerSize>('M');
   const [selectedHours, setSelectedHours] = useState<number>(3);
   const [agreedTerms, setAgreedTerms] = useState(false);
+  const [resetSignal, setResetSignal] = useState(0);
 
   // Live availability & async state
   const [availability, setAvailability] =
@@ -849,13 +850,20 @@ export function useBookingFlow() {
   const handleResetAll = async () => {
     if (currentStep === 'pay' && bookingDbId) {
       await callBookingAction(bookingDbId, { type: 'cancel' });
-      refreshAvailability();
     }
     Time.reset();
     setCurrentTime(Time.now());
     setTimeOffset(0);
     setCurrentStep('select');
     setPendingCheckout(false);
+    setSelectedLocationId('tp1');
+    setSelectedSize('M');
+    setSelectedHours(3);
+    setAgreedTerms(false);
+    setOtpInput('');
+    setGeneratedOtp('123456');
+    setPhoneError('');
+    setOtpError('');
     setBookingDbId('');
     setRentalId('');
     setAllocatedLocker('');
@@ -875,6 +883,14 @@ export function useBookingFlow() {
     setIsLate(false);
     setLateAmount(0);
     setLatePaid(false);
+    setResetSignal((n) => n + 1);
+    refreshAvailability();
+    pushNotification(
+      'Sesi Direset',
+      'Pilihan lokasi, ukuran, durasi, dan jam simulasi dikembalikan ke awal.',
+      'info',
+      'Sistem'
+    );
   };
 
   const handleLogout = async () => {
@@ -945,6 +961,7 @@ export function useBookingFlow() {
     availability,
     isSubmitting,
     actionError,
+    resetSignal,
     // Rental & QR
     rentalId,
     allocatedLocker,

@@ -65,6 +65,7 @@ export default function BookingPage() {
     availability,
     isSubmitting,
     actionError,
+    resetSignal,
     rentalId,
     allocatedLocker,
     guardCode,
@@ -150,6 +151,7 @@ export default function BookingPage() {
             availability={availability}
             isSubmitting={isSubmitting}
             actionError={actionError}
+            resetSignal={resetSignal}
             isLoggedIn={isLoggedIn}
             onOpenLoginCheck={handleOpenLoginCheck}
             onProceedToPay={handleProceedToPay}

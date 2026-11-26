@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   Search,
   X,
@@ -39,6 +39,7 @@ interface ConfigureStepProps {
   availability?: LocationAvailabilityMap | null;
   isSubmitting?: boolean;
   actionError?: string;
+  resetSignal?: number;
   isLoggedIn?: boolean;
   onOpenLoginCheck?: () => void;
   onProceedToPay: () => void;
@@ -58,6 +59,7 @@ export default function ConfigureStep({
   availability,
   isSubmitting = false,
   actionError = '',
+  resetSignal = 0,
   isLoggedIn = false,
   onOpenLoginCheck,
   onProceedToPay,
@@ -65,6 +67,14 @@ export default function ConfigureStep({
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
   const [only24h, setOnly24h] = useState(false);
+
+  useEffect(() => {
+    if (resetSignal > 0) {
+      setSearchQuery('');
+      setCategoryFilter('all');
+      setOnly24h(false);
+    }
+  }, [resetSignal]);
 
   const filteredLocations = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
