@@ -2,10 +2,11 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Database } from '@/types/database';
 
 export function isSupabaseConfigured(): boolean {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key =
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  const key = (
     process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  )?.trim();
   return Boolean(
     url &&
       key &&
@@ -16,12 +17,20 @@ export function isSupabaseConfigured(): boolean {
 }
 
 export function createAdminClient(): SupabaseClient<Database> {
-  const supabaseUrl =
-    process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mock.supabase.co';
-  const supabaseKey =
+  const rawUrl =
+    process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || 'https://mock.supabase.co';
+  let supabaseUrl = rawUrl;
+  try {
+    supabaseUrl = new URL(rawUrl).origin;
+  } catch {
+    supabaseUrl = rawUrl;
+  }
+
+  const supabaseKey = (
     process.env.SUPABASE_SERVICE_ROLE_KEY ||
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-    'mock-anon-key';
+    'mock-anon-key'
+  ).trim();
 
   return createClient<Database>(supabaseUrl, supabaseKey, {
     auth: {

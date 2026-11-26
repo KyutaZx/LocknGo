@@ -284,7 +284,7 @@ export async function getActiveBookingByPhone(
 async function claimReadyLocker(
   locationId: string,
   size: LockerSize
-): Promise<LockerRow | null> {
+): Promise<{ locker: LockerRow | null; error?: string }> {
   const supabase = createAdminClient();
   const { data: candidates, error } = await supabase
     .from('lockers')
@@ -295,10 +295,18 @@ async function claimReadyLocker(
     .eq('status', 'ready')
     .order('unit_number', { ascending: true });
 
-  if (error || !candidates || candidates.length === 0) {
-    return null;
+  if (error) {
+    return {
+      locker: null,
+      error: `Gagal membaca unit loker dari database (${error.message}).`,
+    };
   }
 
+  if (!candidates || candidates.length === 0) {
+    return { locker: null };
+  }
+
+  let lastUpdateError: string | undefined;
   for (const candidate of candidates) {
     const { data: claimed, error: updateError } = await supabase
       .from('lockers')
@@ -311,12 +319,28 @@ async function claimReadyLocker(
       .select('*')
       .maybeSingle();
 
-    if (!updateError && claimed) {
-      return claimed;
+    if (updateError) {
+      lastUpdateError = updateError.message;
+      continue;
+    }
+
+    if (claimed) {
+      return { locker: claimed };
     }
   }
 
-  return null;
+  if (lastUpdateError) {
+    return {
+      locker: null,
+      error: `Gagal mengunci unit loker (${lastUpdateError}). Periksa SUPABASE_SERVICE_ROLE_KEY di Environment Variables.`,
+    };
+  }
+
+  return {
+    locker: null,
+    error:
+      'Gagal mengunci unit loker karena izin update database ditolak (RLS). Pastikan SUPABASE_SERVICE_ROLE_KEY di Vercel diisi dengan Secret Key Supabase.',
+  };
 }
 
 /**
@@ -407,9 +431,17 @@ export async function createBooking(
   }
 
   const supabase = createAdminClient();
-  const claimedLocker = await claimReadyLocker(locationId, size);
+  const claimResult = await claimReadyLocker(locationId, size);
+  const claimedLocker = claimResult.locker;
 
   if (!claimedLocker) {
+    if (claimResult.error) {
+      return {
+        success: false,
+        error: claimResult.error,
+        statusCode: 500,
+      };
+    }
     return {
       success: false,
       error: `Semua loker ukuran ${size} di ${location.name} sedang terpakai. Coba ukuran atau lokasi lain.`,
