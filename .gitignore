@@ -15,9 +15,9 @@ next-env.d.ts
 .env.*
 !.env.local.example
 
-# Rendered media outputs & local video agent cache
-video/out/
-video/.agents/
+# Local AI agent skills & video production sub-project (keep core web app only)
+.agents/
+video/
 
 # Logs & OS clutter
 npm-debug.log*
